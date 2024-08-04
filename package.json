@@ -10,8 +10,10 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-community/toolbar-android": "^0.2.1",
     "react": "18.2.0",
-    "react-native": "0.73.6"
+    "react-native": "0.73.6",
+    "react-native-material-design": "^0.3.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
