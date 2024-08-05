@@ -1,14 +1,20 @@
-import { ScrollView, SafeAreaView } from 'react-native'
-import React from 'react'
+import * as React from 'react'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
 import Main from './pages/Main'
+import Display from './pages/Display'
+
+const Stack = createStackNavigator();
 
 const App = () => {
   return (
-    <SafeAreaView>
-      <ScrollView>
-        <Main />
-      </ScrollView>
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Main">
+        <Stack.Screen name="Main" component={Main} />
+        <Stack.Screen name="Display" component={Display} />
+      </Stack.Navigator>
+    </NavigationContainer>
+    
   )
 }
 

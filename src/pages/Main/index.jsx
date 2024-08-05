@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Text, 
-    SafeAreaView, 
-    View, 
-    Button, 
-    FlatList, 
-    TextInput, 
+import { Text,
+    SafeAreaView,
+    View,
+    Button,
+    FlatList,
+    TextInput,
     TouchableOpacity,
-    Alert} from 'react-native';
+    Alert } from 'react-native';
 import styles from '../../../styles';
 
 const formatAmount = (amount) => {
     return amount.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
-const Main = () => {
+const Main = ({ navigation }) => {
     const [entries, setEntries] = useState([]);
     const [amount, setAmount] = useState('');
     const [info, setInfo] = useState('');
     const [totalUntung, setTotalUntung] = useState(0);
     const [totalRugi, setTotalRugi] = useState(0);
+    const [totalBon, setTotalBon] = useState(0);
 
     useEffect(() => {
         const untungTotal = entries
@@ -30,6 +31,11 @@ const Main = () => {
             .filter(entry => entry.type === 'rugi')
             .reduce((total, entry) => total + parseFloat(entry.amount.replace(/\./g, '')), 0);
         setTotalRugi(rugiTotal);
+
+        const bonTotal = entries
+            .filter(entry => entry.type === 'bon')
+            .reduce((total, entry) => total + parseFloat(entry.amount.replace(/\./g, '')), 0);
+        setTotalBon(bonTotal);
     }, [entries]);
 
     const addEntry = (type) => {
@@ -45,34 +51,35 @@ const Main = () => {
 
     const confirmDeleteEntry = (index) => {
         Alert.alert(
-            "confirm Delete",
-            'are you sure?',
+            "Confirm Delete",
+            "Are you sure?",
             [
                 {
-                    text: "cancel",
+                    text: "Cancel",
                     style: "cancel",
                 },
                 {
                     text: "Delete",
                     onPress: () => deleteEntry(index),
-                    style: "Destructive",
+                    style: "destructive",
                 },
             ],
-            {cancelable: false}
+            { cancelable: false }
         );
-    }
+    };
 
     const deleteEntry = (index) => {
         const newList = entries.filter((_, i) => i !== index);
         setEntries(newList);
     };
 
-
     return (
         <SafeAreaView style={styles.container}>
+            <Button title="Go to Other Screen" onPress={() => navigation.navigate('Display')} />
             <View style={styles.row}>
-                <Text style={[styles.text, styles.textGreen]}>Profit {formatAmount(totalUntung.toString())}</Text>
-                <Text style={[styles.text, styles.textRed]}>Loss {formatAmount(totalRugi.toString())}</Text>
+                <Text style={[styles.text, styles.textGreen]}>{formatAmount(totalUntung.toString())}</Text>
+                <Text style={[styles.text, styles.textRed]}>{formatAmount(totalRugi.toString())}</Text>
+                <Text style={[styles.text, styles.textYellow]}>{formatAmount(totalBon.toString())}</Text>
             </View>
             <View style={styles.inputContainer}>
                 <TextInput
@@ -96,16 +103,29 @@ const Main = () => {
                 <View style={styles.button}>
                     <Button title="Add Rugi" onPress={() => addEntry('rugi')} />
                 </View>
+                <View style={styles.button}>
+                    <Button title="Add Bon" onPress={() => addEntry('bon')} />
+                </View>
             </View>
             <FlatList
                 data={entries}
                 keyExtractor={(item, index) => `${item.type}-${index}`}
                 renderItem={({ item, index }) => (
                     <View style={styles.item}>
-                        <Text style={[styles.itemText, item.type === 'untung' ? styles.itemTextGreen : styles.itemTextRed]}>
+                        <Text style={[
+                            styles.itemText,
+                            item.type === 'untung' ? styles.itemTextGreen :
+                            item.type === 'rugi' ? styles.itemTextRed :
+                            styles.itemTextYellow
+                        ]}>
                             Amount: {item.amount}
                         </Text>
-                        <Text style={[styles.itemText, item.type === 'untung' ? styles.itemTextGreen : styles.itemTextRed]}>
+                        <Text style={[
+                            styles.itemText,
+                            item.type === 'untung' ? styles.itemTextGreen :
+                            item.type === 'rugi' ? styles.itemTextRed :
+                            styles.itemTextYellow
+                        ]}>
                             Info: {item.info}
                         </Text>
                         <TouchableOpacity onPress={() => confirmDeleteEntry(index)} style={styles.deleteButton}>
@@ -113,7 +133,6 @@ const Main = () => {
                         </TouchableOpacity>
                     </View>
                 )}
-                inverted
                 contentContainerStyle={{ flexGrow: 1 }}
             />
         </SafeAreaView>

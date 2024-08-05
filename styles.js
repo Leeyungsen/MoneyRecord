@@ -21,6 +21,9 @@ const styles = StyleSheet.create({
     textRed: {
         color: 'red',
     },
+    textYellow: {
+        color: '#e88974'
+    },
     inputContainer: {
         flexDirection: 'column',
         marginBottom: 16,
@@ -46,6 +49,9 @@ const styles = StyleSheet.create({
     },
     itemTextRed: {
         color: 'red',
+    },
+    itemTextYellow: {
+        color: '#e88974'
     },
     buttonContainer: {
         flexDirection: 'row',
