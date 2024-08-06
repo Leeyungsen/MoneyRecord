@@ -123,6 +123,15 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 16,
     },
+    userInfo: {
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    userName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'black'
+    }
 });
 
 export default styles;

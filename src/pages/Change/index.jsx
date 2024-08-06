@@ -5,7 +5,7 @@ import { FlatList } from "react-native-gesture-handler";
 
 const Change = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [buttonNames, setButtonNames] = useState('');
+    const [buttonNames, setButtonNames] = useState([]);
     const [tempName, setTempName] = useState('');
 
     const handleSave = () => {
@@ -58,7 +58,7 @@ const Change = ({ navigation }) => {
                 renderItem={({ item }) => (
                     <TouchableOpacity 
                         style={styles.button1}
-                        onPress={() => navigation.navigate('Display')}
+                        onPress={() => navigation.navigate('Display', { userName: item})}
                     >
                         <Text style={styles.buttonText}>{item}</Text>
                     </TouchableOpacity>

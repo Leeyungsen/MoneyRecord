@@ -8,6 +8,7 @@ import { Text,
     TouchableOpacity,
     Alert } from 'react-native';
 import styles from '../../../styles';
+import { useRoute } from '@react-navigation/native';
 
 const formatAmount = (amount) => {
     return amount.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -20,6 +21,9 @@ const Display = ({ navigation }) => {
     const [totalUntung, setTotalUntung] = useState(0);
     const [totalRugi, setTotalRugi] = useState(0);
     const [totalBon, setTotalBon] = useState(0);
+
+    const route = useRoute();
+    const userName = route.params?.userName || '';
 
     useEffect(() => {
         const untungTotal = entries
@@ -39,9 +43,9 @@ const Display = ({ navigation }) => {
     }, [entries]);
 
     const addEntry = (type) => {
-        if (amount.trim() !== '' && info.trim() !== '') {
+        if (amount.trim() !== '' && info.trim() !== '' && userName.trim() !== '') {
             const date = new Date().toLocaleDateString();
-            const newEntry = { amount: formatAmount(amount), info, type, date };
+            const newEntry = { amount: formatAmount(amount), info, userName, type, date };
             const newList = [...entries, newEntry];
             setEntries(newList);
             console.log('Updated entries:', newList);
@@ -82,9 +86,14 @@ const Display = ({ navigation }) => {
                     onPress={() => navigation.navigate('Main', {
                         totalUntung: formatAmount(totalUntung.toString()),
                         totalRugi: formatAmount(totalRugi.toString()),
-                        totalBon: formatAmount(totalBon.toString())
+                        totalBon: formatAmount(totalBon.toString()),
+                        entries
                     })} 
                 />
+            </View>
+
+            <View style={styles.userInfo}>
+                <Text style={styles.userName}>{userName}</Text>
             </View>
             
             <View style={styles.row}>
@@ -92,6 +101,7 @@ const Display = ({ navigation }) => {
                 <Text style={[styles.text, styles.textRed]}>{formatAmount(totalRugi.toString())}</Text>
                 <Text style={[styles.text, styles.textYellow]}>{formatAmount(totalBon.toString())}</Text>
             </View>
+
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
@@ -107,6 +117,7 @@ const Display = ({ navigation }) => {
                     placeholder="Enter info"
                 />
             </View>
+
             <View style={styles.buttonContainer}>
                 <View style={styles.button}>
                     <Button title="Add Untung" onPress={() => addEntry('untung')} />
@@ -118,6 +129,7 @@ const Display = ({ navigation }) => {
                     <Button title="Add Bon" onPress={() => addEntry('bon')} />
                 </View>
             </View>
+            
             <FlatList
                 data={entries}
                 keyExtractor={(item, index) => `${item.type}-${index}`}
