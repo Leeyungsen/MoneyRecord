@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#fff '
     },
     row: {
         flexDirection: 'row',
@@ -62,6 +63,11 @@ const styles = StyleSheet.create({
         marginLeft: 4,
         marginRight: 4,
     },
+    buttonText: {
+        color: '#FFFFFF',
+        textAlign: 'center',
+        fontSize: 16,
+    },
     listContainer: {
         flex: 1,
         marginTop: 20,
@@ -75,7 +81,48 @@ const styles = StyleSheet.create({
     deleteButtonText: {
         color: 'white',
         fontWeight: "bold",
-    }
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 18,
+        marginBottom: 10,
+    },
+    modalInput: {
+        width: '100%',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        marginBottom: 10,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    button1: {
+        backgroundColor: '#007BFF',
+        padding: 10,
+        margin: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#FFFFFF',
+        textAlign: 'center',
+        fontSize: 16,
+    },
 });
 
 export default styles;

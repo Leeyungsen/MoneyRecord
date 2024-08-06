@@ -76,7 +76,17 @@ const Display = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Button title="Go to Other Screen" onPress={() => navigation.navigate('Main')} />
+            <View>
+                <Button 
+                    title="Go to Other Screen" 
+                    onPress={() => navigation.navigate('Main', {
+                        totalUntung: formatAmount(totalUntung.toString()),
+                        totalRugi: formatAmount(totalRugi.toString()),
+                        totalBon: formatAmount(totalBon.toString())
+                    })} 
+                />
+            </View>
+            
             <View style={styles.row}>
                 <Text style={[styles.text, styles.textGreen]}>{formatAmount(totalUntung.toString())}</Text>
                 <Text style={[styles.text, styles.textRed]}>{formatAmount(totalRugi.toString())}</Text>
@@ -143,7 +153,7 @@ const Display = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 )}
-                
+                inverted
                 contentContainerStyle={{ flexGrow: 1 }}
             />
         </SafeAreaView>
