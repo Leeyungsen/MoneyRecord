@@ -8,19 +8,26 @@ const Main = ({ navigation , route }) => {
     
     return (
         <SafeAreaView style={styles.container}>
+
+            {/* // Buat calender supaya bisa liat data per hari */}
+
             <View style={styles.row}>
                 <Text style={[styles.text, styles.textGreen]}>{totalUntung}</Text>
                 <Text style={[styles.text, styles.textRed]}>{totalRugi}</Text>
                 <Text style={[styles.text, styles.textYellow]}>{totalBon}</Text>
             </View>
             <View>
-            <Button title="See Other" onPress={() => navigation.navigate("Change")} />
+            <Button title="Add" onPress={() => navigation.navigate("Change")} />
             </View>
             <FlatList 
                 data={entries}
                 keyExtractor={(item, index) => `${item.type}-${index}`}
                 renderItem={({ item, index }) => (
                     <View style={styles.item}>
+                        {/* 
+                            Ini udah bener kasih liat keseluruhan tapi bisa 
+                            berubah ketika tanggal dipilih secara spesifik
+                        */}
                         <Text style={[
                             styles.itemText,
                             item.type === 'untung' ? styles.itemTextGreen :

@@ -42,11 +42,15 @@ const Display = ({ navigation }) => {
         setTotalBon(bonTotal);
     }, [entries]);
 
+    const diffrence = totalUntung - totalRugi;
+    const diffrenceTextStyle = diffrence >= 0 ? styles.textGreen : styles.textRed;
+    const diffrenceBoxStyle = diffrence >= 0 ? styles.textGreen : styles.textRed;
+
     const addEntry = (type) => {
         if (amount.trim() !== '' && info.trim() !== '' && userName.trim() !== '') {
             const date = new Date().toLocaleDateString();
             const newEntry = { amount: formatAmount(amount), info, userName, type, date };
-            const newList = [...entries, newEntry];
+            const newList = [newEntry, ...entries];
             setEntries(newList);
             console.log('Updated entries:', newList);
             setAmount('');
@@ -80,9 +84,14 @@ const Display = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
+
+            <View style={styles.userInfo}>
+                <Text style={styles.userName}>{userName}</Text>
+            </View>
+            
             <View>
                 <Button 
-                    title="Go to Other Screen" 
+                    title="Save" 
                     onPress={() => navigation.navigate('Main', {
                         totalUntung: formatAmount(totalUntung.toString()),
                         totalRugi: formatAmount(totalRugi.toString()),
@@ -92,14 +101,18 @@ const Display = ({ navigation }) => {
                 />
             </View>
 
-            <View style={styles.userInfo}>
-                <Text style={styles.userName}>{userName}</Text>
-            </View>
-            
             <View style={styles.row}>
-                <Text style={[styles.text, styles.textGreen]}>{formatAmount(totalUntung.toString())}</Text>
-                <Text style={[styles.text, styles.textRed]}>{formatAmount(totalRugi.toString())}</Text>
-                <Text style={[styles.text, styles.textYellow]}>{formatAmount(totalBon.toString())}</Text>
+                <Text style={[styles.Box, styles.textGreen]}>{formatAmount(totalUntung.toString())}</Text>
+                <Text style={[styles.Box, styles.textRed]}>{formatAmount(totalRugi.toString())}</Text>
+                <Text style={[styles.Box, styles.textYellow]}>{formatAmount(totalBon.toString())}</Text>
+            </View>
+
+            <View>
+                <View style={[styles.box,  diffrenceBoxStyle]}>
+                    <Text style={diffrenceTextStyle}>
+                        {diffrence >= 0 ? `Profit: ${formatAmount(diffrence.toString())}` : `Loss: ${formatAmount(Math.abs(diffrence).toString())}`}
+                    </Text>
+                </View>
             </View>
 
             <View style={styles.inputContainer}>
@@ -120,13 +133,13 @@ const Display = ({ navigation }) => {
 
             <View style={styles.buttonContainer}>
                 <View style={styles.button}>
-                    <Button title="Add Untung" onPress={() => addEntry('untung')} />
+                    <Button title="Pengeluaran" onPress={() => addEntry('rugi')} />
                 </View>
                 <View style={styles.button}>
-                    <Button title="Add Rugi" onPress={() => addEntry('rugi')} />
+                    <Button title="Penghasilan" onPress={() => addEntry('untung')} />
                 </View>
                 <View style={styles.button}>
-                    <Button title="Add Bon" onPress={() => addEntry('bon')} />
+                    <Button title="Bon" onPress={() => addEntry('bon')} />
                 </View>
             </View>
             
@@ -165,7 +178,6 @@ const Display = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 )}
-                inverted
                 contentContainerStyle={{ flexGrow: 1 }}
             />
         </SafeAreaView>

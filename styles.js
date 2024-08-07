@@ -3,10 +3,18 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff '
+        backgroundColor: '#fff ',
+        padding: 10,
     },
     row: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
+
+    },
+    column: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
     },
     text: {
         backgroundColor: 'white',
@@ -24,6 +32,14 @@ const styles = StyleSheet.create({
     },
     textYellow: {
         color: '#e88974'
+    },
+    Box: {
+        borderWidth: 1,
+        borderColor: '#ddd', // Light gray border
+        borderRadius: 5,
+        paddingVertical: 5, // Vertical padding
+        paddingHorizontal: 10, // Horizontal padding
+        marginBottom: 10,
     },
     inputContainer: {
         flexDirection: 'column',
