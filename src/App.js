@@ -1,9 +1,9 @@
-import * as React from 'react'
-import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
-import Main from './pages/Main'
-import Display from './pages/Display'
-import Change from './pages/Change'
+import * as React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import Main from './pages/Main';
+import Display from './pages/Display';
+import Change from './pages/Change';
 
 const Stack = createStackNavigator();
 
@@ -16,8 +16,7 @@ const App = () => {
         <Stack.Screen name="Change" component={Change} />
       </Stack.Navigator>
     </NavigationContainer>
-    
-  )
-}
+  );
+};
 
 export default App;

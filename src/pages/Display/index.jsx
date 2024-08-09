@@ -14,6 +14,15 @@ const formatAmount = (amount) => {
     return amount.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+};
+
+
 const Display = ({ navigation }) => {
     const [entries, setEntries] = useState([]);
     const [amount, setAmount] = useState('');
@@ -48,7 +57,7 @@ const Display = ({ navigation }) => {
 
     const addEntry = (type) => {
         if (amount.trim() !== '' && info.trim() !== '' && userName.trim() !== '') {
-            const date = new Date().toLocaleDateString();
+            const date = formatDate(new Date());
             const newEntry = { amount: formatAmount(amount), info, userName, type, date };
             const newList = [newEntry, ...entries];
             setEntries(newList);
