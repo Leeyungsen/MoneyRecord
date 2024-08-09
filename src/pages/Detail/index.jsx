@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, Button, SafeAreaView, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, SafeAreaView } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import styles from '../../../styles';
 
 const formatAmount = (amount) => {
@@ -7,41 +8,37 @@ const formatAmount = (amount) => {
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
-const Main = ({ navigation, route }) => {
-    const { totalUntung = '0', totalRugi = '0', totalBon = '0', entries = [] } = route.params || {};
+const Detail = ({ route }) => {
+    const { entries = [] } = route.params;
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [filteredEntries, setFilteredEntries] = useState(entries);
 
-    const totalDifference = parseFloat(totalUntung) - parseFloat(totalRugi);
+    useEffect(() => {
+        if (selectedDate) {
+            const filteredData = entries.filter(entry => entry.date === selectedDate);
+            setFilteredEntries(filteredData);
+        } else {
+            setFilteredEntries(entries);
+        }
+    }, [selectedDate, entries]);
+
+    const handleDayPress = (day) => {
+        setSelectedDate(day.dateString);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 }}>
-                <Text style={[styles.text, styles.textGreen]}>{formatAmount(totalUntung)}</Text>
-                <Text style={[styles.text, styles.textRed]}>{formatAmount(totalRugi)}</Text>
-                <Text style={[styles.text, styles.textYellow]}>{formatAmount(totalBon)}</Text>
-            </View>
-
-            <View style={[
-                styles.box,
-                totalDifference >= 0 ? styles.boxGreen : styles.boxRed,
-                { marginBottom: 10 }
-            ]}>
-                <Text style={totalDifference >= 0 ? styles.textGreen : styles.textRed}>
-                    {totalDifference >= 0 
-                        ? `Profit: ${formatAmount(totalDifference.toString())}` 
-                        : `Loss: ${formatAmount(Math.abs(totalDifference).toString())}`}
-                </Text>
-            </View>
-
             <View style={{ marginBottom: 10 }}>
-                <Button title="View Details" onPress={() => navigation.navigate('Detail', { entries })} />
-            </View>
-
-            <View style={{ marginBottom: 10 }}>
-                <Button title="Add" onPress={() => navigation.navigate("Change")} />
+                <Calendar 
+                    onDayPress={handleDayPress}
+                    markedDates={{
+                        [selectedDate]: { selected: true, selectedColor: 'blue' },
+                    }}
+                />
             </View>
 
             <FlatList
-                data={entries}
+                data={filteredEntries}
                 keyExtractor={(item, index) => `${item.type}-${index}`}
                 renderItem={({ item }) => (
                     <View style={styles.item}>
@@ -82,9 +79,8 @@ const Main = ({ navigation, route }) => {
                 )}
                 contentContainerStyle={{ flexGrow: 1 }}
             />
-
         </SafeAreaView>
     );
 };
 
-export default Main;
+export default Detail;

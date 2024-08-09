@@ -4,6 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import Main from './pages/Main';
 import Display from './pages/Display';
 import Change from './pages/Change';
+import Detail from './pages/Detail';
 
 const Stack = createStackNavigator();
 
@@ -14,6 +15,7 @@ const App = () => {
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="Display" component={Display} />
         <Stack.Screen name="Change" component={Change} />
+        <Stack.Screen name="Detail" component={Detail} />
       </Stack.Navigator>
     </NavigationContainer>
   );
