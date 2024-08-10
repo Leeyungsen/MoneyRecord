@@ -1,48 +1,102 @@
-import React from 'react';
-import { View, Text, Button, SafeAreaView, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Button, FlatList, SafeAreaView } from 'react-native';
 import styles from '../../../styles';
+import SQLite from 'react-native-sqlite-storage';
 
+const db = SQLite.openDatabase({ name: 'app.db', location: 'default' });
+
+// Function to format amount with thousands separator
 const formatAmount = (amount) => {
-    if (!amount) return '0';
-    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') || '0';
 };
 
-const Main = ({ navigation, route }) => {
-    const { totalUntung = '0', totalRugi = '0', totalBon = '0', entries = [] } = route.params || {};
+// Function to calculate totals
+const calculateTotals = (entries, type) => {
+    return entries
+        .filter(entry => entry.type === type)
+        .reduce((total, entry) => {
+            const amount = entry.amount ? parseFloat(entry.amount.toString().replace(/\./g, '')) : 0;
+            return total + (isNaN(amount) ? 0 : amount);
+        }, 0);
+};
 
-    const totalDifference = parseFloat(totalUntung) - parseFloat(totalRugi);
+// Main component
+const Main = ({ navigation }) => {
+    const [entries, setEntries] = useState([]);
+    const [totalUntung, setTotalUntung] = useState(0);
+    const [totalRugi, setTotalRugi] = useState(0);
+    const [totalBon, setTotalBon] = useState(0);
+
+    // Load all entries from the database
+    const loadEntries = () => {
+        db.transaction(tx => {
+            tx.executeSql(
+                'SELECT * FROM entries',
+                [],
+                (tx, results) => {
+                    let data = [];
+                    for (let i = 0; i < results.rows.length; i++) {
+                        data.push(results.rows.item(i));
+                    }
+                    setEntries(data); // Update entries state
+                },
+                (tx, error) => {
+                    console.error('Error loading entries:', error);
+                    setEntries([]); // Clear entries on error
+                }
+            );
+        });
+    };
+
+    // Initialize and load data on component mount
+    useEffect(() => {
+        // Create table if not exists
+        db.transaction(tx => {
+            tx.executeSql(
+                `CREATE TABLE IF NOT EXISTS entries (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    amount TEXT,
+                    info TEXT,
+                    userName TEXT,
+                    type TEXT,
+                    date TEXT
+                )`,
+                [],
+                (tx, result) => console.log('Table created successfully'),
+                (tx, error) => console.log('Error creating table:', error)
+            );
+        });
+
+        loadEntries(); // Initial load of entries
+    }, []);
+
+    // Calculate totals whenever entries change
+    useEffect(() => {
+        setTotalUntung(calculateTotals(entries, 'untung'));
+        setTotalRugi(calculateTotals(entries, 'rugi'));
+        setTotalBon(calculateTotals(entries, 'bon'));
+    }, [entries]);
+
+    // Calculate difference between totalUntung and totalRugi
+    const difference = totalUntung - totalRugi;
+    const differenceTextStyle = difference >= 0 ? styles.textGreen : styles.textRed;
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 }}>
-                <Text style={[styles.text, styles.textGreen]}>{formatAmount(totalUntung)}</Text>
-                <Text style={[styles.text, styles.textRed]}>{formatAmount(totalRugi)}</Text>
-                <Text style={[styles.text, styles.textYellow]}>{formatAmount(totalBon)}</Text>
+            <View style={styles.row}>
+                <Text style={[styles.box, styles.textGreen]}>{formatAmount(totalUntung)}</Text>
+                <Text style={[styles.box, styles.textRed]}>{formatAmount(totalRugi)}</Text>
+                <Text style={[styles.box, styles.textYellow]}>{formatAmount(totalBon)}</Text>
             </View>
 
-            <View style={[
-                styles.box,
-                totalDifference >= 0 ? styles.boxGreen : styles.boxRed,
-                { marginBottom: 10 }
-            ]}>
-                <Text style={totalDifference >= 0 ? styles.textGreen : styles.textRed}>
-                    {totalDifference >= 0 
-                        ? `Profit: ${formatAmount(totalDifference.toString())}` 
-                        : `Loss: ${formatAmount(Math.abs(totalDifference).toString())}`}
-                </Text>
-            </View>
+            <Text style={differenceTextStyle}>Profit: {formatAmount(difference)}</Text>
 
-            <View style={{ marginBottom: 10 }}>
-                <Button title="View Details" onPress={() => navigation.navigate('Detail', { entries })} />
-            </View>
-
-            <View style={{ marginBottom: 10 }}>
-                <Button title="Add" onPress={() => navigation.navigate("Change")} />
-            </View>
+            <Button title="VIEW DETAILS" onPress={() => navigation.navigate('Detail')} />
+            <Button title="ADD ENTRY" onPress={() => navigation.navigate('Change', { userName: '' })} />
 
             <FlatList
                 data={entries}
-                keyExtractor={(item, index) => `${item.type}-${index}`}
+                keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <View style={styles.item}>
                         <Text style={[
@@ -59,7 +113,7 @@ const Main = ({ navigation, route }) => {
                             item.type === 'rugi' ? styles.itemTextRed :
                             styles.itemTextYellow
                         ]}>
-                            Amount: {formatAmount(item.amount.toString())}
+                            Amount: {formatAmount(parseFloat(item.amount).toFixed(2))}
                         </Text>
                         <Text style={[
                             styles.itemText,
@@ -69,20 +123,18 @@ const Main = ({ navigation, route }) => {
                         ]}>
                             Info: {item.info}
                         </Text>
-                        <Text 
-                            style={[
-                                item.type === 'untung' ? styles.itemTextGreen :
-                                item.type === 'rugi' ? styles.itemTextRed :
-                                styles.itemTextYellow
-                            ]}
-                        >
+                        <Text style={[
+                            styles.itemText,
+                            item.type === 'untung' ? styles.itemTextGreen :
+                            item.type === 'rugi' ? styles.itemTextRed :
+                            styles.itemTextYellow
+                        ]}>
                             Date: {item.date}
                         </Text>
                     </View>
                 )}
                 contentContainerStyle={{ flexGrow: 1 }}
             />
-
         </SafeAreaView>
     );
 };

@@ -7,6 +7,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   row: {
+    backgroundColor: 'white',
+    margin: '10',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -34,10 +36,10 @@ const styles = StyleSheet.create({
   },
   Box: {
     borderWidth: 1,
-    borderColor: '#ddd', // Light gray border
+    borderColor: '#ddd', 
     borderRadius: 5,
-    paddingVertical: 5, // Vertical padding
-    paddingHorizontal: 10, // Horizontal padding
+    paddingVertical: 5, 
+    paddingHorizontal: 10,
     marginBottom: 10,
   },
   inputContainer: {
@@ -74,6 +76,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   button: {
+    backgroundColor: '#007AFF',
     flex: 1,
     marginLeft: 4,
     marginRight: 4,

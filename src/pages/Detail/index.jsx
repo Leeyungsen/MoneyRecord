@@ -1,26 +1,35 @@
+// Detail.js
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, SafeAreaView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import styles from '../../../styles';
 
+import { fetchEntriesByDate, fetchAllEntries } from '../../../database'; // Adjust the path as needed
+import { useFocusEffect } from '@react-navigation/native';
+
 const formatAmount = (amount) => {
-    if (!amount) return '0';
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
-const Detail = ({ route }) => {
-    const { entries = [] } = route.params;
+const Detail = () => {
+    const [entries, setEntries] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
-    const [filteredEntries, setFilteredEntries] = useState(entries);
+    const [filteredEntries, setFilteredEntries] = useState([]);
 
-    useEffect(() => {
-        if (selectedDate) {
-            const filteredData = entries.filter(entry => entry.date === selectedDate);
-            setFilteredEntries(filteredData);
-        } else {
-            setFilteredEntries(entries);
-        }
-    }, [selectedDate, entries]);
+    useFocusEffect(
+        React.useCallback(() => {
+            if (selectedDate) {
+                fetchEntriesByDate(selectedDate, (data) => {
+                    setFilteredEntries(data);
+                });
+            } else {
+                fetchAllEntries((data) => {
+                    setFilteredEntries(data);
+                });
+            }
+        }, [selectedDate])
+    );
 
     const handleDayPress = (day) => {
         setSelectedDate(day.dateString);
@@ -39,7 +48,7 @@ const Detail = ({ route }) => {
 
             <FlatList
                 data={filteredEntries}
-                keyExtractor={(item, index) => `${item.type}-${index}`}
+                keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <View style={styles.item}>
                         <Text style={[
@@ -56,7 +65,7 @@ const Detail = ({ route }) => {
                             item.type === 'rugi' ? styles.itemTextRed :
                             styles.itemTextYellow
                         ]}>
-                            Amount: {formatAmount(item.amount.toString())}
+                            Amount: {formatAmount(parseFloat(item.amount).toFixed(2))}
                         </Text>
                         <Text style={[
                             styles.itemText,
