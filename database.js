@@ -54,31 +54,41 @@ export const deleteEntry = (id, successCallback) => {
     });
 };
 
-export const fetchAllEntries = (successCallback) => {
+export const fetchEntriesByDate = (date, callback) => {
     db.transaction(tx => {
         tx.executeSql(
-            `SELECT * FROM entries`,
-            [],
-            (_, { rows }) => {
-                successCallback(rows._array);
+            'SELECT * FROM entries WHERE date = ?;',
+            [date],
+            (tx, results) => {
+                let data = [];
+                for (let i = 0; i < results.rows.length; i++) {
+                    data.push(results.rows.item(i));
+                }
+                callback(data);
             },
-            (_, error) => {
-                console.log("Error fetching entries:", error);
+            (tx, error) => {
+                console.error('Failed to fetch entries by date', error);
+                callback([]);
             }
         );
     });
 };
 
-export const fetchEntriesByDate = (date, successCallback) => {
+export const fetchAllEntries = (callback) => {
     db.transaction(tx => {
         tx.executeSql(
-            `SELECT * FROM entries WHERE date = ?`,
-            [date],
-            (_, { rows }) => {
-                successCallback(rows._array);
+            'SELECT * FROM entries;',
+            [],
+            (tx, results) => {
+                let data = [];
+                for (let i = 0; i < results.rows.length; i++) {
+                    data.push(results.rows.item(i));
+                }
+                callback(data);
             },
-            (_, error) => {
-                console.log("Error fetching entries by date:", error);
+            (tx, error) => {
+                console.error('Failed to fetch all entries', error);
+                callback([]);
             }
         );
     });

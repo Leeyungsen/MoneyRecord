@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Text, View, TextInput, TouchableOpacity, Modal, Alert } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import SQLite from 'react-native-sqlite-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import styles from "../../../styles";
 
 const db = SQLite.openDatabase(
@@ -11,7 +12,7 @@ const db = SQLite.openDatabase(
     },
     () => { console.log('Database opened'); },
     error => { console.error(error); }
-    );
+);
 
 const Change = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -19,10 +20,13 @@ const Change = ({ navigation }) => {
     const [tempName, setTempName] = useState('');
 
     useEffect(() => {
-        // Create table if it doesn't exist
+        // Create tables if they don't exist
         db.transaction(tx => {
             tx.executeSql(
                 'CREATE TABLE IF NOT EXISTS Buttons (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);'
+            );
+            tx.executeSql(
+                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, amount TEXT, info TEXT, userName TEXT, type TEXT, date TEXT);'
             );
         });
 
@@ -70,6 +74,48 @@ const Change = ({ navigation }) => {
         }
     };
 
+    const handleDelete = (userName) => {
+        Alert.alert(
+            "Confirm Delete",
+            `Are you sure you want to delete "${userName}" and all related data?`,
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "Delete", onPress: () => deleteUserAndEntries(userName), style: "destructive" },
+            ],
+            { cancelable: false }
+        );
+    };
+
+    const deleteUserAndEntries = (userName) => {
+        db.transaction(tx => {
+            // Delete the user from the Buttons table
+            tx.executeSql(
+                'DELETE FROM Buttons WHERE name = ?;',
+                [userName],
+                (tx, results) => {
+                    console.log('Deleted button', userName);
+
+                    // Delete all related entries from the entries table
+                    tx.executeSql(
+                        'DELETE FROM entries WHERE userName = ?;',
+                        [userName],
+                        (tx, results) => {
+                            console.log('Deleted all entries for', userName);
+                            // Reload the button names after deletion
+                            loadButtonNames();
+                        },
+                        error => {
+                            console.error('Failed to delete entries', error);
+                        }
+                    );
+                },
+                error => {
+                    console.error('Failed to delete button', error);
+                }
+            );
+        });
+    };
+
     const showPrompt = () => {
         setTempName('');
         setModalVisible(true);
@@ -111,12 +157,20 @@ const Change = ({ navigation }) => {
                 data={buttonNames}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity 
-                        style={styles.button1}
-                        onPress={() => navigation.navigate('Display', { userName: item })}
-                    >
-                        <Text style={styles.buttonText}>{item}</Text>
-                    </TouchableOpacity>
+                    <View style={styles.listItemContainer}>
+                        <TouchableOpacity 
+                            style={styles.button1}
+                            onPress={() => navigation.navigate('Display', { userName: item })}
+                        >
+                            <Text style={styles.buttonText}>{item}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => handleDelete(item)}
+                        >
+                            <Text style={styles.deleteButtonText}>Delete</Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
             />
         </View>

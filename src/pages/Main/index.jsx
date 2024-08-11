@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, FlatList, SafeAreaView } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import styles from '../../../styles';
 import SQLite from 'react-native-sqlite-storage';
 
 const db = SQLite.openDatabase({ name: 'app.db', location: 'default' });
 
-// Function to format amount with thousands separator
 const formatAmount = (amount) => {
     return amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') || '0';
 };
@@ -20,14 +20,12 @@ const calculateTotals = (entries, type) => {
         }, 0);
 };
 
-// Main component
 const Main = ({ navigation }) => {
     const [entries, setEntries] = useState([]);
     const [totalUntung, setTotalUntung] = useState(0);
     const [totalRugi, setTotalRugi] = useState(0);
     const [totalBon, setTotalBon] = useState(0);
 
-    // Load all entries from the database
     const loadEntries = () => {
         db.transaction(tx => {
             tx.executeSql(
@@ -48,9 +46,7 @@ const Main = ({ navigation }) => {
         });
     };
 
-    // Initialize and load data on component mount
     useEffect(() => {
-        // Create table if not exists
         db.transaction(tx => {
             tx.executeSql(
                 `CREATE TABLE IF NOT EXISTS entries (
@@ -70,14 +66,18 @@ const Main = ({ navigation }) => {
         loadEntries(); // Initial load of entries
     }, []);
 
-    // Calculate totals whenever entries change
+    useFocusEffect(
+        React.useCallback(() => {
+            loadEntries(); // Load entries every time the screen is focused
+        }, [])
+    );
+
     useEffect(() => {
         setTotalUntung(calculateTotals(entries, 'untung'));
         setTotalRugi(calculateTotals(entries, 'rugi'));
         setTotalBon(calculateTotals(entries, 'bon'));
     }, [entries]);
 
-    // Calculate difference between totalUntung and totalRugi
     const difference = totalUntung - totalRugi;
     const differenceTextStyle = difference >= 0 ? styles.textGreen : styles.textRed;
 
@@ -113,7 +113,7 @@ const Main = ({ navigation }) => {
                             item.type === 'rugi' ? styles.itemTextRed :
                             styles.itemTextYellow
                         ]}>
-                            Amount: {formatAmount(parseFloat(item.amount).toFixed(2))}
+                            Rp. {formatAmount(parseFloat(item.amount).toFixed(2))}
                         </Text>
                         <Text style={[
                             styles.itemText,

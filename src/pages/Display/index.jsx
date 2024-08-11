@@ -164,6 +164,38 @@ const Display = ({ navigation, route }) => {
         });
     };
 
+    const handleClearData = () => {
+        Alert.alert(
+            "Confirm Clear Data",
+            "Are you sure you want to delete all data for this user?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Clear",
+                    onPress: () => {
+                        db.transaction(tx => {
+                            tx.executeSql(
+                                'DELETE FROM entries WHERE userName = ?',
+                                [userName],
+                                (tx, result) => {
+                                    console.log('All data deleted for', userName);
+                                    // Clear entries state and reload entries
+                                    setEntries([]); // Clear state
+                                    loadEntries(); // Reload to ensure FlatList is updated
+                                },
+                                (tx, error) => {
+                                    console.error('Error deleting data:', error);
+                                }
+                            );
+                        });
+                    },
+                    style: "destructive",
+                },
+            ],
+            { cancelable: false }
+        );
+    };
+
     // Calculate difference between totalUntung and totalRugi
     const difference = totalUntung - totalRugi;
     const differenceTextStyle = difference >= 0 ? styles.textGreen : styles.textRed;
@@ -199,14 +231,14 @@ const Display = ({ navigation, route }) => {
                     style={styles.input}
                     value={amount}
                     onChangeText={setAmount}
-                    placeholder="Enter amount"
+                    placeholder="Nominal"
                     keyboardType="numeric"
                 />
                 <TextInput
                     style={styles.input}
                     value={info}
                     onChangeText={setInfo}
-                    placeholder="Enter info"
+                    placeholder="Keterangan"
                 />
             </View>
 
@@ -222,6 +254,10 @@ const Display = ({ navigation, route }) => {
                 </TouchableOpacity>
             </View>
 
+            <TouchableOpacity style={[styles.deleteButton, styles.clearButton]} onPress={handleClearData}>
+                <Text style={styles.deleteButtonText}>Clear All Data</Text>
+            </TouchableOpacity>
+
             <FlatList
                 data={entries}
                 keyExtractor={(item) => item.id.toString()}
@@ -233,7 +269,7 @@ const Display = ({ navigation, route }) => {
                             item.type === 'rugi' ? styles.itemTextRed :
                             styles.itemTextYellow
                         ]}>
-                            Amount: {formatAmount(parseFloat(item.amount).toFixed(2))}
+                            Rp. {formatAmount(parseFloat(item.amount))}
                         </Text>
                         <Text style={[
                             styles.itemText,

@@ -1,5 +1,3 @@
-// Detail.js
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, SafeAreaView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
@@ -65,7 +63,7 @@ const Detail = () => {
                             item.type === 'rugi' ? styles.itemTextRed :
                             styles.itemTextYellow
                         ]}>
-                            Amount: {formatAmount(parseFloat(item.amount).toFixed(2))}
+                            Rp. {formatAmount(parseFloat(item.amount).toFixed(2))}
                         </Text>
                         <Text style={[
                             styles.itemText,
