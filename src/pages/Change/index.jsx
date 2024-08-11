@@ -124,6 +124,14 @@ const Change = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <Button 
+                title="Calender"
+                onPress={() => navigation.navigate('Detail')}
+            />
+            <Button 
+                title="Total"
+                onPress={() => navigation.navigate('Main')}
+            />
+            <Button 
                 title="NEW" 
                 onPress={showPrompt} 
             />

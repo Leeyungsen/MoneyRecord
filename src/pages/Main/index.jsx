@@ -91,10 +91,10 @@ const Main = ({ navigation }) => {
 
             <Text style={differenceTextStyle}>Profit: {formatAmount(difference)}</Text>
 
-            <Button title="VIEW DETAILS" onPress={() => navigation.navigate('Detail')} />
-            <Button title="ADD ENTRY" onPress={() => navigation.navigate('Change', { userName: '' })} />
+            {/* <Button title="VIEW DETAILS" onPress={() => navigation.navigate('Detail')} />
+            <Button title="ADD ENTRY" onPress={() => navigation.navigate('Change', { userName: '' })} /> */}
 
-            <FlatList
+            {/* <FlatList
                 data={entries}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
@@ -134,7 +134,7 @@ const Main = ({ navigation }) => {
                     </View>
                 )}
                 contentContainerStyle={{ flexGrow: 1 }}
-            />
+            /> */}
         </SafeAreaView>
     );
 };
