@@ -112,14 +112,14 @@ const Display = ({ navigation, route }) => {
         }
 
         const date = formatDate(new Date());
-        const formattedAmount = formatAmount(amount);
+        const rawAmount = amount.replace(/\./g ,'')
 
-        console.log('Inserting entry with data:', { amount: formattedAmount, info, userName, type, date });
+        console.log('Inserting entry with data:', { amount: rawAmount, info, userName, type, date });
 
         db.transaction(tx => {
             tx.executeSql(
                 'INSERT INTO entries (amount, info, userName, type, date) VALUES (?, ?, ?, ?, ?)',
-                [formattedAmount, info, userName, type, date],
+                [rawAmount, info, userName, type, date],
                 (tx, result) => {
                     console.log('Entry added successfully');
                     loadEntries(); // Refresh the list after insertion
