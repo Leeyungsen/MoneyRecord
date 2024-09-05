@@ -80,7 +80,7 @@ const Detail = () => {
                                 styles.itemTextYellow
                             ]}
                         >
-                            Date: {item.date}
+                            Tanggal: {item.date}
                         </Text>
                     </View>
                 )}

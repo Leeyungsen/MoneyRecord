@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Text, SafeAreaView, View, Button, FlatList, TextInput, TouchableOpacity, Alert } from "react-native";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import styles from "../../../styles";
 import SQLlite from "react-native-sqlite-storage";
 
@@ -15,8 +16,7 @@ const formatAmount = (amount) => {
 };
 
 // Function to format date as YYYY-MM-DD
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
+const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
@@ -31,6 +31,9 @@ const Display = ({ navigation, route }) => {
     const [totalUntung, setTotalUntung] = useState(0);
     const [totalRugi, setTotalRugi] = useState(0);
     const [totalBon, setTotalBon] = useState(0);
+
+    const [date, setDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     const userName = route.params?.userName || '';
 
@@ -111,15 +114,15 @@ const Display = ({ navigation, route }) => {
             return;
         }
 
-        const date = formatDate(new Date());
+        const formattedDate = formatDate(date);
         const rawAmount = amount.replace(/\./g ,'')
 
-        console.log('Inserting entry with data:', { amount: rawAmount, info, userName, type, date });
+        console.log('Inserting entry with data:', { amount: rawAmount, info, userName, type, date: formattedDate });
 
         db.transaction(tx => {
             tx.executeSql(
                 'INSERT INTO entries (amount, info, userName, type, date) VALUES (?, ?, ?, ?, ?)',
-                [rawAmount, info, userName, type, date],
+                [rawAmount, info, userName, type, formattedDate],
                 (tx, result) => {
                     console.log('Entry added successfully');
                     loadEntries(); // Refresh the list after insertion
@@ -201,6 +204,13 @@ const Display = ({ navigation, route }) => {
     const differenceTextStyle = difference >= 0 ? styles.textGreen : styles.textRed;
     const differenceBoxStyle = difference >= 0 ? styles.boxGreen : styles.boxRed;
 
+    const onDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            setDate(selectedDate);
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.userInfo}>
@@ -240,6 +250,20 @@ const Display = ({ navigation, route }) => {
                     onChangeText={setInfo}
                     placeholder="Keterangan"
                 />
+            
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <Text style={styles.Date}>Pilih Tanggal: {formatDate(date)}</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+                <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display="default"
+                    onChange={onDateChange}
+                />
+            )}
+
             </View>
 
             <View style={styles.buttonContainer}>
@@ -285,7 +309,7 @@ const Display = ({ navigation, route }) => {
                             item.type === 'rugi' ? styles.itemTextRed :
                             styles.itemTextYellow
                         ]}>
-                            Date: {item.date}
+                            Tanggal: {item.date}
                         </Text>
                         <TouchableOpacity onPress={() => confirmDeleteEntry(item.id)} style={styles.deleteButton}>
                             <Text style={styles.deleteButtonText}>Delete</Text>

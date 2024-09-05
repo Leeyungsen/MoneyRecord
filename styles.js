@@ -34,6 +34,9 @@ const styles = StyleSheet.create({
   textYellow: {
     color: '#e88974',
   },
+  Date: {
+    color: 'black',
+  },
   Box: {
     borderWidth: 1,
     borderColor: '#ddd', 
