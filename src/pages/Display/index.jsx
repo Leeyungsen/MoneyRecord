@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, SafeAreaView, View, Button, FlatList, TextInput, TouchableOpacity, Alert } from "react-native";
+import { Text, SafeAreaView, View, Button, FlatList, TextInput, TouchableOpacity, Alert , Modal} from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import styles from "../../../styles";
 import SQLlite from "react-native-sqlite-storage";
@@ -31,6 +31,9 @@ const Display = ({ navigation, route }) => {
     const [totalUntung, setTotalUntung] = useState(0);
     const [totalRugi, setTotalRugi] = useState(0);
     const [totalBon, setTotalBon] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedEntry, setSelectEntry] = useState(null);
+    const [editingItem, setEditingItem] = useState(null);
 
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -167,6 +170,42 @@ const Display = ({ navigation, route }) => {
         });
     };
 
+    // Open modal to edit entry
+    const openEditModal = (entry) => {
+        setSelectEntry(entry);
+        setAmount(entry.amount);
+        setInfo(entry.info);
+        setDate(new Date(entry.date));
+        setEditingItem(entry);
+        setModalVisible(true);
+    }
+
+    // Update entry in database
+    const updateEntry = () => {
+        if (editingItem) {
+            const formattedDate = formatDate(date);
+            const rawAmount = amount.replace(/\./g, '');
+
+            db.transaction(tx => {
+                tx.executeSql(
+                    'UPDATE entries SET amount = ?, info = ?, date = ? WHERE id = ?',
+                    [rawAmount, info, formattedDate, editingItem.id],
+                    (tx, result) => {
+                        console.log('Entry updated successfully');
+                        loadEntries(); // Refresh the list after update
+                        setEditingItem(null); // Reset editingItem
+                        setAmount(''); // Clear input fields
+                        setInfo('');
+                        setModalVisible(false); // Close the modal
+                    },
+                    (tx, error) => {
+                        console.error('Error updating entry:', error);
+                    }
+                );
+            });
+        }
+    };
+
     const handleClearData = () => {
         Alert.alert(
             "Confirm Clear Data",
@@ -199,11 +238,32 @@ const Display = ({ navigation, route }) => {
         );
     };
 
+    const saveEntry = (type) => {
+        if (amount.trim() === '' || info.trim() === '' || userName.trim() === '') {
+            console.error('Validation failed: One or more fields are empty.');
+            return;
+        }
+    
+        const formattedDate = formatDate(date);
+        const rawAmount = amount.replace(/\./g, '');
+
+        if (editingItem) {
+            // Update existing entry
+            updateEntry();
+        } else {
+            // Add new entry
+            addEntry(type);
+        }
+
+        setModalVisible(false); // Close the modal after saving
+    };
+
     // Calculate difference between totalUntung and totalRugi
     const difference = totalUntung - totalRugi;
     const differenceTextStyle = difference >= 0 ? styles.textGreen : styles.textRed;
     const differenceBoxStyle = difference >= 0 ? styles.boxGreen : styles.boxRed;
 
+    // Handling Date picker
     const onDateChange = (event, selectedDate) => {
         setShowDatePicker(false);
         if (selectedDate) {
@@ -314,11 +374,38 @@ const Display = ({ navigation, route }) => {
                         <TouchableOpacity onPress={() => confirmDeleteEntry(item.id)} style={styles.deleteButton}>
                             <Text style={styles.deleteButtonText}>Delete</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity onPress={() => openEditModal(item)} style={styles.editButton}>
+                            <Text style={styles.editButtonText}>Edit</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
                 inverted
                 contentContainerStyle={{ flexGrow: 1 }}
             />
+
+            <Modal visible={modalVisible} transparent={true} animationType="slide">
+                <View style={styles.modalContainer}>
+                    <TextInput
+                        placeholder="Amount"
+                        value={amount}
+                        onChangeText={setAmount}
+                        keyboardType="numeric"
+                    />
+                    <TextInput
+                        placeholder="Info"
+                        value={info}
+                        onChangeText={setInfo}
+                    />
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                        <Text style={styles.Date}>Pilih Tanggal: {formatDate(date)}</Text>
+                    </TouchableOpacity>
+                    <Button title="Save Entry" onPress={() => saveEntry(editingItem?.type)} />
+                    <Button title="Cancel" onPress={() => {
+                        setModalVisible(false);
+                        setEditingItem(null); // Clear editing state on cancel
+                    }} />
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };

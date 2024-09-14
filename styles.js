@@ -153,6 +153,58 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
+  editButton: {
+    marginLeft: 10,
+    backgroundColor: 'blue',
+    padding: 5,
+    borderRadius: 5,
+  },
+  editButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  editButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10
+},
+editButtonText: {
+    color: 'white',
+    fontWeight: 'bold'
+},
+modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)'
+},
+modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%'
+},
+input: {
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
+    borderColor: 'gray',
+},
+buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+},
+button: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5
+},
+buttonText: {
+    color: 'white',
+    fontWeight: 'bold'
+},
 });
 
 export default styles;
