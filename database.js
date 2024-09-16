@@ -39,61 +39,6 @@ export const insertEntry = (db, amount, info, userName, type, date) => {
     });
 };
 
-export const deleteEntry = (id, successCallback) => {
-    db.transaction(tx => {
-        tx.executeSql(
-            `DELETE FROM entries WHERE id = ?`,
-            [id],
-            (_, result) => {
-                successCallback(result);
-            },
-            (_, error) => {
-                console.log("Error deleting entry:", error);
-            }
-        );
-    });
-};
-
-export const fetchEntriesByDate = (date, callback) => {
-    db.transaction(tx => {
-        tx.executeSql(
-            'SELECT * FROM entries WHERE date = ?;',
-            [date],
-            (tx, results) => {
-                let data = [];
-                for (let i = 0; i < results.rows.length; i++) {
-                    data.push(results.rows.item(i));
-                }
-                callback(data);
-            },
-            (tx, error) => {
-                console.error('Failed to fetch entries by date', error);
-                callback([]);
-            }
-        );
-    });
-};
-
-export const fetchAllEntries = (callback) => {
-    db.transaction(tx => {
-        tx.executeSql(
-            'SELECT * FROM entries;',
-            [],
-            (tx, results) => {
-                let data = [];
-                for (let i = 0; i < results.rows.length; i++) {
-                    data.push(results.rows.item(i));
-                }
-                callback(data);
-            },
-            (tx, error) => {
-                console.error('Failed to fetch all entries', error);
-                callback([]);
-            }
-        );
-    });
-};
-
 export const setupDatabase = () => {
     db.transaction(tx => {
         tx.executeSql(
@@ -104,5 +49,90 @@ export const setupDatabase = () => {
         );
     });
 };setupDatabase();
+
+// Fetch all entries
+export const fetchAllEntries = (callback) => {
+    db.transaction(tx => {
+        tx.executeSql(
+            'SELECT * FROM entries',
+            [],
+            (tx, results) => {
+                let data = [];
+                for (let i = 0; i < results.rows.length; i++) {
+                    data.push(results.rows.item(i));
+                }
+                callback(data);
+            },
+            (error) => {
+                console.error('Error fetching all entries:', error);
+                callback([]);
+            }
+        );
+    });
+};
+
+// Fetch entries by date
+export const fetchEntriesByDate = (date, callback) => {
+    db.transaction(tx => {
+        tx.executeSql(
+            'SELECT * FROM entries WHERE date = ?',
+            [date],
+            (tx, results) => {
+                let data = [];
+                for (let i = 0; i < results.rows.length; i++) {
+                    data.push(results.rows.item(i));
+                }
+                callback(data);
+            },
+            (error) => {
+                console.error('Error fetching entries by date:', error);
+                callback([]);
+            }
+        );
+    });
+};
+
+// Update an entry by ID
+export const updateEntry = (id, newAmount, newInfo, callback) => {
+    db.transaction(tx => {
+        tx.executeSql(
+            'UPDATE entries SET amount = ?, info = ? WHERE id = ?',
+            [newAmount, newInfo, id],
+            (tx, results) => {
+                if (results.rowsAffected > 0) {
+                    console.log('Entry updated successfully');
+                    callback(); // Callback to refresh the data after update
+                } else {
+                    console.log('Failed to update entry');
+                }
+            },
+            (error) => {
+                console.error('Error updating entry: ', error);
+            }
+        );
+    });
+};
+
+// Delete an entry by ID
+export const deleteEntry = (id, callback) => {
+    db.transaction(tx => {
+        tx.executeSql(
+            'DELETE FROM entries WHERE id = ?',
+            [id],
+            (tx, results) => {
+                if (results.rowsAffected > 0) {
+                    console.log('Entry deleted successfully');
+                    callback(); // Callback to refresh the data after deletion
+                } else {
+                    console.log('Failed to delete entry');
+                }
+            },
+            (error) => {
+                console.error('Error deleting entry: ', error);
+            }
+        );
+    });
+};
+
 
 export default db;

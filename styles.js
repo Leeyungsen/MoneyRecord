@@ -205,6 +205,30 @@ buttonText: {
     color: 'white',
     fontWeight: 'bold'
 },
+buttonRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  marginVertical: 10,
+},
+buttonUntung: {
+  padding: 10,
+  backgroundColor: 'green',
+  borderRadius: 5,
+},
+buttonRugi: {
+  padding: 10,
+  backgroundColor: 'red',
+  borderRadius: 5,
+},
+buttonBon: {
+  padding: 10,
+  backgroundColor: '#e88974',
+  borderRadius: 5,
+},
+buttonActive: {
+  fontWeight: 'bold',
+},
+
 });
 
 export default styles;
