@@ -43,29 +43,23 @@ const Detail = () => {
     };
 
     const handleUpdate = () => {
-        // Check if editingEntry is not null and has an id
-        if (editingEntry && editingEntry.id) {
-            if (newAmount !== '' && newInfo !== '') {
-                // Update only amount and info
-                updateEntry(editingEntry.id, newAmount, newInfo, () => {
-                    Alert.alert('Success', 'Entry updated successfully');
-                    setModalVisible(false);
-                    setEditingEntry(null);
-                    setNewAmount('');
-                    setNewInfo('');
-                    // Refresh the entries after update
-                    if (selectedDate) {
-                        fetchEntriesByDate(selectedDate, setFilteredEntries);
-                    } else {
-                        fetchAllEntries(setFilteredEntries);
-                    }
-                });
-            } else {
-                Alert.alert('Error', 'Please fill all fields.');
-            }
+        if (editingEntry && newAmount !== '' && newInfo !== '') {
+            // Update only amount and info
+            updateEntry(editingEntry.id, newAmount, newInfo, () => {
+                Alert.alert('Success', 'Entry updated successfully');
+                setModalVisible(false);
+                setEditingEntry(null);
+                setNewAmount('');
+                setNewInfo('');
+                // Refresh the entries after update
+                if (selectedDate) {
+                    fetchEntriesByDate(selectedDate, setFilteredEntries);
+                } else {
+                    fetchAllEntries(setFilteredEntries);
+                }
+            });
         } else {
-            console.log('Editing entry is null or invalid:', editingEntry); // Debugging line
-            Alert.alert('Error', 'Entry not found.');
+            Alert.alert('Error', 'Please fill all fields.');
         }
     };
 
