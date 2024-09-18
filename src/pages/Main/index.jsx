@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; // Add Picker from react-native-picker
 import { useFocusEffect } from '@react-navigation/native';
 import styles from '../../../styles';
 import SQLite from 'react-native-sqlite-storage';
@@ -10,7 +11,6 @@ const formatAmount = (amount) => {
     return amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') || '0';
 };
 
-// Function to calculate totals
 const calculateTotals = (entries, type) => {
     return entries
         .filter(entry => entry.type === type)
@@ -22,9 +22,9 @@ const calculateTotals = (entries, type) => {
 
 const sortEntriesByDate = (entries) => {
     return entries.sort((a, b) => {
-        const dateA = new Date(a.date.split('/').reverse().join('-')); // Handle date format
+        const dateA = new Date(a.date.split('/').reverse().join('-')); 
         const dateB = new Date(b.date.split('/').reverse().join('-'));
-        return dateB - dateA; // Descending order
+        return dateB - dateA;
     });
 };
 
@@ -35,6 +35,8 @@ const Main = ({ navigation }) => {
     const [totalRugi, setTotalRugi] = useState(0);
     const [totalBon, setTotalBon] = useState(0);
     const [filter, setFilter] = useState('all');
+    const [selectedUser, setSelectedUser] = useState('all'); // State for selected user
+    const [users, setUsers] = useState([]); // List of users for the dropdown
 
     const loadEntries = () => {
         db.transaction(tx => {
@@ -43,14 +45,20 @@ const Main = ({ navigation }) => {
                 [],
                 (tx, results) => {
                     let data = [];
+                    let userList = new Set(); // To collect unique user names
                     for (let i = 0; i < results.rows.length; i++) {
-                        data.push(results.rows.item(i));
+                        const entry = results.rows.item(i);
+                        data.push(entry);
+                        if (entry.userName) {
+                            userList.add(entry.userName); // Add unique user to the set
+                        }
                     }
-                    setEntries(data); // Update entries state
+                    setEntries(data);
+                    setUsers([...userList]); // Set unique users to the users state
                 },
                 (tx, error) => {
                     console.error('Error loading entries:', error);
-                    setEntries([]); // Clear entries on error
+                    setEntries([]);
                 }
             );
         });
@@ -73,12 +81,12 @@ const Main = ({ navigation }) => {
             );
         });
 
-        loadEntries(); // Initial load of entries
+        loadEntries();
     }, []);
 
     useFocusEffect(
         React.useCallback(() => {
-            loadEntries(); // Load entries every time the screen is focused
+            loadEntries();
         }, [])
     );
 
@@ -87,20 +95,35 @@ const Main = ({ navigation }) => {
         setTotalRugi(calculateTotals(entries, 'rugi'));
         setTotalBon(calculateTotals(entries, 'bon'));
 
-        // Filter entries based on selected filter and sort by date
+        // Filter by selected user and type (untung, rugi, bon, etc.)
         let filtered = entries;
         if (filter !== 'all') {
-            filtered = entries.filter((entry) => entry.type === filter);
+            filtered = filtered.filter(entry => entry.type === filter);
+        }
+        if (selectedUser !== 'all') {
+            filtered = filtered.filter(entry => entry.userName === selectedUser);
         }
         setFilteredEntries(sortEntriesByDate(filtered));
 
-    }, [entries, filter]);
+    }, [entries, filter, selectedUser]); // Recalculate totals and filter whenever entries, filter, or user changes
 
     const difference = totalUntung - totalRugi;
     const differenceTextStyle = difference >= 0 ? styles.textGreen : styles.textRed;
 
     return (
         <SafeAreaView style={styles.container}>
+
+            {/* Dropdown */}
+            <Picker
+                selectedValue={selectedUser}
+                onValueChange={(itemValue) => setSelectedUser(itemValue)}
+                style={styles.picker}>
+                <Picker.Item label="All Users" value="all" />
+                {users.map((user, index) => (
+                    <Picker.Item key={index} label={user} value={user} />
+                ))}
+            </Picker>
+
             <View style={styles.buttonRow}>
                 <TouchableOpacity
                     style={[styles.buttonRugi, filter === 'rugi' && styles.buttonActive]}
@@ -124,13 +147,13 @@ const Main = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.row}>
+            {/* <View style={styles.row}>
                 <Text style={[styles.box, styles.textGreen]}>{formatAmount(totalUntung)}</Text>
                 <Text style={[styles.box, styles.textRed]}>{formatAmount(totalRugi)}</Text>
                 <Text style={[styles.box, styles.textYellow]}>{formatAmount(totalBon)}</Text>
             </View>
 
-            <Text style={differenceTextStyle}>Profit: {formatAmount(difference)}</Text>
+            <Text style={differenceTextStyle}>Profit: {formatAmount(difference)}</Text> */}
 
             <View style={{ flex: 1 }}>
                 {filteredEntries.length === 0 ? (
